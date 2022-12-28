@@ -7,6 +7,9 @@
     <string name="category">Categoria: %1$s</string>
     <string name="lose">Has perdido\n¿Deseas jugar de nuevo?</string>
     <string name="win">Has ganado\n¿Deseas jugar de nuevo?</string>
+    <string name="leave">¿Estás seguro de abandonar el juego?</string>
+    <string name="lives1">Tienes 1 vida</string>
+    <string name="lives">Tienes %1$d vidas</string>
 
 
 <!--    KeyBoard chars-->

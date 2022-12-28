@@ -6,7 +6,7 @@
     android:layout_width="280dp"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:layout_margin="8dp">
+    >
 
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
@@ -19,13 +19,16 @@
         tools:ignore="UnusedAttribute">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/cDialog"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             >
             <View
+                android:id="@+id/viewDialog"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:alpha="0.8"
+                android:alpha="0.3"
+                android:background="@color/black"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 />
@@ -57,7 +60,11 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginStart="18dp"
                 android:layout_marginEnd="18dp"
-                android:textAlignment="center"/>
+                android:textAlignment="center"
+                android:textColor="@color/ah_yellowD"
+                android:shadowColor="@color/ah_redD"
+                android:shadowRadius="3"
+                />
 
             <LinearLayout
                 android:layout_width="match_parent"

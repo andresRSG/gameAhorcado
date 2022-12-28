@@ -21,7 +21,7 @@ class AdapterLetter(private val context:Context, private var letters :List<Lette
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        if(!letters[position].isCheck){
+        if(letters[position].isCheck){
             holder.tvLetter.text = letters[position].letter.toString()
         }
 
