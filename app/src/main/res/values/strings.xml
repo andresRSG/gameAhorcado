@@ -21,6 +21,7 @@
     <string name="k_u">u</string><string name="k_v">v</string><string name="k_w">w</string><string name="k_x">x</string>
     <string name="k_y">y</string><string name="k_z">z</string>
     <string name="exit_menu">Menu</string>
+    <string name="save_game">Guardar Partida</string>
 
 
 </resources>

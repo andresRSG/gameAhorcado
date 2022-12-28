@@ -15,6 +15,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.blogspot.atifsoftwares.animatoolib.Animatoo
 import com.example.ahorcadogame.databinding.ActivityPlayBinding
 import com.example.ahorcadogame.models.ButtonActivate
 import com.example.ahorcadogame.models.LettersCheck
@@ -191,16 +192,21 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         val text = dialog.findViewById<TextView>(R.id.text_description_dialog)
         val buttonPlay = dialog.findViewById<Button>(R.id.btPlay)
         val buttonExit = dialog.findViewById<Button>(R.id.btExit)
-        val vBg = dialog.findViewById<ConstraintLayout>(R.id.cDialog)
+        val buttonSave = dialog.findViewById<Button>(R.id.btSave)
+        val cBg = dialog.findViewById<ConstraintLayout>(R.id.cDialog)
+        val vBg = dialog.findViewById<View>(R.id.viewDialog)
+
         if(leave){
             text.text = getString(R.string.leave)
+            buttonSave.visibility = View.VISIBLE
+            vBg.visibility = View.GONE
         }else{
             if(win){
                 text.text = getString(R.string.win)
-                vBg.setBackgroundResource(R.drawable.image_avada_kadabra)
+                cBg.setBackgroundResource(R.drawable.image_avada_kadabra)
             }else{
                 text.text = getString(R.string.lose)
-                vBg.setBackgroundResource(R.drawable.image_avada_kadabra)
+                cBg.setBackgroundResource(R.drawable.image_avada_kadabra)
             }
         }
 
@@ -215,6 +221,11 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
             if(!leave){
                 newGame()
             }
+        }
+
+        buttonSave.setOnClickListener {
+            dialog.dismiss()
+            finish()
         }
 
         dialog.show()
@@ -314,6 +325,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onBackPressed() {
         openDialogWL(false,true)
+        Animatoo.animateSwipeLeft(this@PlayActivity)
     }
 
 
