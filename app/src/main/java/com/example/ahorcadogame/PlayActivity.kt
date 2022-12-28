@@ -1,13 +1,15 @@
 package com.example.ahorcadogame
 
+import android.os.Build
 import android.os.Bundle
-import android.os.Vibrator
 import android.util.Log
 import android.view.View
 import android.widget.Button
-import android.widget.TextView
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ahorcadogame.databinding.ActivityPlayBinding
+import com.example.ahorcadogame.models.LettersCheck
 import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
@@ -20,15 +22,28 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
     private var mDictionary: ArrayList<String>? = null
     private val guess = 0.toChar()
     private var flagGameOver = false
+    
+    private lateinit var listLettersCheck:ArrayList<Char>
 
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPlayBinding.inflate(layoutInflater)
         setContentView(binding.root)
         dictionary()
 
-        //Setting up the keyboard
 
+
+        val chars =  "Palabra".toCharArray()
+
+        val auxArrayLetters:ArrayList<LettersCheck> = ArrayList()
+
+        for(item in chars){
+            auxArrayLetters.add(LettersCheck(item))
+        }
+
+        binding.rvLetters.layoutManager = LinearLayoutManager(this@PlayActivity,LinearLayoutManager.HORIZONTAL ,false)
+        binding.rvLetters.adapter = AdapterLetter(this@PlayActivity, auxArrayLetters)
 
         //Setting up the keyboard
         for (id in KEYBOARD.keys) {
@@ -50,6 +65,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         EvilHangman evilHangman = new EvilHangman(dictionary, letters);
     }*/
     fun updateGame(guessedLetter: Char) {
+
     }
 
     override fun onClick(view: View) {
@@ -58,6 +74,8 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
             val button = findViewById(id) as Button
             button.text = ""
             button.isEnabled = false
+
+//            listLettersCheck =
 //            val guessedLetter: Char = KEYBOARD.get(id)?.toChar() ?:
 //            updateGame(guessedLetter)
         }
