@@ -14,5 +14,8 @@
     <color name="ah_yellowL">#EEBA30</color>
     <color name="ah_yellowD">#D3A625</color>
 
+    <color name="transparent">#00FFFFFF</color>
+
+
 
 </resources>

@@ -5,6 +5,9 @@
     <string name="exit">Salir</string>
 
     <string name="category">Categoria: %1$s</string>
+    <string name="lose">Has perdido\n¿Deseas jugar de nuevo?</string>
+    <string name="win">Has ganado\n¿Deseas jugar de nuevo?</string>
+
 
 <!--    KeyBoard chars-->
     <string name="k_a">a</string><string name="k_b">b</string><string name="k_c">c</string><string name="k_d">d</string>
@@ -14,9 +17,7 @@
     <string name="k_q">q</string><string name="k_r">r</string><string name="k_s">s</string><string name="k_t">t</string>
     <string name="k_u">u</string><string name="k_v">v</string><string name="k_w">w</string><string name="k_x">x</string>
     <string name="k_y">y</string><string name="k_z">z</string>
-
-
-
+    <string name="exit_menu">Menu</string>
 
 
 </resources>

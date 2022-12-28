@@ -1,13 +1,19 @@
 package com.example.ahorcadogame
 
 import android.annotation.SuppressLint
+import android.app.Dialog
+import android.media.Image
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.OnLifecycleEvent
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.ahorcadogame.databinding.ActivityPlayBinding
 import com.example.ahorcadogame.models.LettersCheck
@@ -36,6 +42,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
     private lateinit var info:ResponserServiceLetter
     private lateinit var chars:CharArray
     private var lives:Int = 6
+//    private var listButtons =
 
 
     @RequiresApi(Build.VERSION_CODES.N)
@@ -63,6 +70,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
+
     fun callLetter(){
         val call = Constants.getRetrofit().create(API::class.java).getLetterService()
 
@@ -76,11 +84,17 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
                     response.body()?.let { it ->
                         binding.pbConexion.visibility = View.GONE
-
+                        lives = 6
                         info = it
                         info.category.let {itC -> binding.tvCategory.text = getString(R.string.category, itC)}
                         info.word?.let { itW ->
+
                             chars =  itW.toCharArray()
+                            updateImage()
+
+                            mArrayLetters.clear()
+                            listLettersCheck.clear()
+
                             for(item in chars){
                                 mArrayLetters.add(LettersCheck(item))
                             }
@@ -109,22 +123,112 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateGame(guessedLetter: Char) {
-        var default:Char = '0'
+        val default:Char = '0'
         if(guessedLetter == default){
             //no existe
         }else{
             listLettersCheck.add(guessedLetter)
-
+            var correct = false
             for(item in mArrayLetters){
                 if(item.letter == guessedLetter){
                     item.isCheck = true
+                    correct = true
                 }
             }
             binding.rvLetters.adapter = AdapterLetter(this@PlayActivity, mArrayLetters)
             binding.rvLetters.adapter?.notifyDataSetChanged()
 
+            if(!correct){
+                lives -= 1
+                updateImage()
+            }
+
+            verifyVictoryOrLose()
         }
 
+    }
+
+
+
+    fun verifyVictoryOrLose(){
+
+        if(lives == 0){
+            //Perdiste
+            Toast.makeText(this@PlayActivity, "Perdite", Toast.LENGTH_LONG)
+            println("Perdiste")
+            openDialogWL(false)
+        }else{
+            var allLettersCheck:Boolean = true
+            for(item in mArrayLetters){
+                if(!item.isCheck){
+                    allLettersCheck = false
+                    break
+                }
+            }
+
+            if(allLettersCheck){
+                //your Win
+                openDialogWL(true)
+
+                Toast.makeText(this@PlayActivity, "Ganaste", Toast.LENGTH_LONG)
+            }
+        }
+
+    }
+
+    fun openDialogWL( win:Boolean){
+
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_finish_game)
+        dialog.window?.setBackgroundDrawableResource(R.drawable.drawable_bg_alert)
+        val text = dialog.findViewById<TextView>(R.id.text_description_dialog)
+        val buttonPlay = dialog.findViewById<Button>(R.id.btPlay)
+        val buttonExit = dialog.findViewById<Button>(R.id.btExit)
+        if(win){
+            text.text = getString(R.string.win)
+        }else{
+            text.text = getString(R.string.lose)
+        }
+
+        buttonExit.setOnClickListener {
+            dialog.dismiss()
+            finish()
+        }
+
+        buttonPlay.setOnClickListener {
+            dialog.dismiss()
+            newGame()
+        }
+
+        dialog.show()
+
+    }
+
+    fun newGame(){
+        binding.pbConexion.visibility = View.VISIBLE
+        callLetter()
+        super.onResume()
+    }
+
+
+    fun updateImage(){
+        when(lives){
+            0 ->
+                binding.ivState.setImageResource(R.drawable.ah1)
+            1 ->
+                binding.ivState.setImageResource(R.drawable.ah2)
+            2 ->
+                binding.ivState.setImageResource(R.drawable.ah3)
+            3 ->
+                binding.ivState.setImageResource(R.drawable.ah4)
+            4 ->
+                binding.ivState.setImageResource(R.drawable.ah5)
+            5 ->
+                binding.ivState.setImageResource(R.drawable.ah6)
+            6 ->
+                binding.ivState.setImageResource(R.drawable.ah7)
+
+        }
     }
 
     override fun onClick(view: View) {
@@ -139,6 +243,13 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
+
+
+    fun activateButtons(){
+        super.onResume()
+    }
+
+
     private fun dictionary(){
         KEYBOARD.put(R.id.button1, 'a');KEYBOARD.put(R.id.button2, 'b');KEYBOARD.put(R.id.button3, 'c');KEYBOARD.put(R.id.button4, 'd')
         KEYBOARD.put(R.id.button5, 'e');KEYBOARD.put(R.id.button6, 'f');KEYBOARD.put(R.id.button7, 'g');KEYBOARD.put(R.id.button8, 'h')
@@ -147,6 +258,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         KEYBOARD.put(R.id.button17, 'q');KEYBOARD.put(R.id.button18, 'r');KEYBOARD.put(R.id.button19, 's');KEYBOARD.put(R.id.button20, 't')
         KEYBOARD.put(R.id.button21, 'u');KEYBOARD.put(R.id.button22, 'v');KEYBOARD.put(R.id.button23, 'w');KEYBOARD.put(R.id.button24, 'x')
         KEYBOARD.put(R.id.button25, 'y');KEYBOARD.put(R.id.button26, 'z')
+
     }
 
 }
