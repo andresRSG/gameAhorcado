@@ -3,4 +3,20 @@
     <string name="play">Jugar</string>
     <string name="indications">Instrucciones</string>
     <string name="exit">Salir</string>
+
+    <string name="category">Categoria: %1$s</string>
+
+<!--    KeyBoard chars-->
+    <string name="k_a">a</string><string name="k_b">b</string><string name="k_c">c</string><string name="k_d">d</string>
+    <string name="k_e">e</string><string name="k_f">f</string><string name="k_g">g</string><string name="k_h">h</string>
+    <string name="k_i">i</string><string name="k_j">j</string><string name="k_k">k</string><string name="k_l">l</string>
+    <string name="k_m">m</string><string name="k_n">n</string><string name="k_o">o</string><string name="k_p">p</string>
+    <string name="k_q">q</string><string name="k_r">r</string><string name="k_s">s</string><string name="k_t">t</string>
+    <string name="k_u">u</string><string name="k_v">v</string><string name="k_w">w</string><string name="k_x">x</string>
+    <string name="k_y">y</string><string name="k_z">z</string>
+
+
+
+
+
 </resources>
