@@ -13,6 +13,8 @@ object Constants {
     const val PLAY = 1
     const val TERMINATE = 2
 
+    const val IDNEWGAME = "isNewGame"
+
     const val GAMESAVE = false
     const val NEWGAME = true
 

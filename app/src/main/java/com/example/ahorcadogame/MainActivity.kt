@@ -35,6 +35,8 @@ class MainActivity : AppCompatActivity() {
                 startGame(Constants.NEWGAME)
             else showDialogSaveGame()
         }
+
+        binding.goOut.setOnClickListener { finish() }
     }
 
     fun showDialogSaveGame(){
@@ -57,8 +59,8 @@ class MainActivity : AppCompatActivity() {
         val intent = Intent(this@MainActivity, PlayActivity::class.java)
         val parameters = Bundle()
 
-        if(isNew) parameters.putBoolean("isNewGame", Constants.NEWGAME)
-        else parameters.putBoolean("isNewGame", Constants.GAMESAVE)
+        if(isNew) parameters.putBoolean(Constants.IDNEWGAME, Constants.NEWGAME)
+        else parameters.putBoolean(Constants.IDNEWGAME, Constants.GAMESAVE)
 
         intent.putExtras(parameters)
         startActivity(intent)

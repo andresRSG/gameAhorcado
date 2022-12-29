@@ -6,7 +6,6 @@ import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.util.Log
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
@@ -60,7 +59,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
 
         val bundle = intent.extras
-        val isNewGame = bundle?.getBoolean("isNewGame")
+        val isNewGame = bundle?.getBoolean(Constants.IDNEWGAME)
 
         isNewGame.let {
             if(it == Constants.NEWGAME) newGame()
@@ -194,7 +193,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
     fun updateGame(guessedLetter: Char) {
         val default = '0' //is Char
         if(guessedLetter == default){
-            //no existe
+            //no existe: la ñ, por ejemplo
         }else{
             listLettersCheck.add(guessedLetter)
             var correct = false
