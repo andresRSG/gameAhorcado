@@ -55,6 +55,9 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofitVersion"
     implementation "com.squareup.retrofit2:converter-gson:$retrofitVersion"
 
+    /* Gson parse */
+    implementation 'com.google.code.gson:gson:2.8.6'
+
     //ANIMATION
     implementation 'com.github.AtifSayings:Animatoo:1.0.1'
 

@@ -1,10 +1,14 @@
 package com.example.ahorcadogame
 
+import android.app.Dialog
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.widget.Button
 import com.blogspot.atifsoftwares.animatoolib.Animatoo
 import com.example.ahorcadogame.databinding.ActivityMainBinding
+import com.example.ahorcadogame.util.Constants
+import com.example.ahorcadogame.util.preferences
 
 class MainActivity : AppCompatActivity() {
 
@@ -16,7 +20,6 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         listeners()
-
     }
 
 
@@ -28,9 +31,37 @@ class MainActivity : AppCompatActivity() {
 
     private fun listeners(){
         binding.tvPlay.setOnClickListener {
-            val intent = Intent(this@MainActivity, PlayActivity::class.java)
-            startActivity(intent)
-            Animatoo.animateShrink(this@MainActivity)
+            if(preferences.game.isNullOrEmpty())
+                startGame(Constants.NEWGAME)
+            else showDialogSaveGame()
         }
+    }
+
+    fun showDialogSaveGame(){
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_continue_game)
+        val buttonNewGame = dialog.findViewById<Button>(R.id.btNewGame)
+        val buttonContinueGame = dialog.findViewById<Button>(R.id.btContinueGame)
+
+        buttonNewGame.setOnClickListener {
+            dialog.dismiss()
+            startGame(Constants.NEWGAME) }
+        buttonContinueGame.setOnClickListener {
+            dialog.dismiss()
+            startGame(Constants.GAMESAVE) }
+
+        dialog.show()
+    }
+
+    fun startGame(isNew:Boolean){
+        val intent = Intent(this@MainActivity, PlayActivity::class.java)
+        val parameters = Bundle()
+
+        if(isNew) parameters.putBoolean("isNewGame", Constants.NEWGAME)
+        else parameters.putBoolean("isNewGame", Constants.GAMESAVE)
+
+        intent.putExtras(parameters)
+        startActivity(intent)
+        Animatoo.animateShrink(this@MainActivity)
     }
 }

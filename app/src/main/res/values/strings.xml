@@ -10,6 +10,14 @@
     <string name="leave">¿Estás seguro de abandonar el juego?</string>
     <string name="lives1">Tienes 1 vida</string>
     <string name="lives">Tienes %1$d vidas</string>
+    <string name="exit_menu">Menu</string>
+    <string name="save_game">Guardar Partida</string>
+    <string name="answer">La respuesta correcta era: %1$s</string>
+    <string name="no_conection_network">No cuentas con conexión a intenet\nConectate a una red</string>
+    <string name="no_conection_service">No se pudo conectar con el servidor</string>
+    <string name="new_game">Nuevo juego</string>
+    <string name="continue_game">Continuar juego</string>
+    <string name="check_continue_game">Tienes una partida guardada\n¿Deseas continuar con la partida o iniciar una nueva?</string>
 
 
 <!--    KeyBoard chars-->
@@ -20,8 +28,7 @@
     <string name="k_q">q</string><string name="k_r">r</string><string name="k_s">s</string><string name="k_t">t</string>
     <string name="k_u">u</string><string name="k_v">v</string><string name="k_w">w</string><string name="k_x">x</string>
     <string name="k_y">y</string><string name="k_z">z</string>
-    <string name="exit_menu">Menu</string>
-    <string name="save_game">Guardar Partida</string>
+
 
 
 </resources>

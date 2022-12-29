@@ -2,6 +2,7 @@ package com.example.ahorcadogame
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.net.ConnectivityManager
 import android.os.Build
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -10,7 +11,6 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -18,10 +18,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.blogspot.atifsoftwares.animatoolib.Animatoo
 import com.example.ahorcadogame.databinding.ActivityPlayBinding
 import com.example.ahorcadogame.models.ButtonActivate
+import com.example.ahorcadogame.models.Game
 import com.example.ahorcadogame.models.LettersCheck
 import com.example.ahorcadogame.models.ResponserServiceLetter
 import com.example.ahorcadogame.service.API
 import com.example.ahorcadogame.util.Constants
+import com.example.ahorcadogame.util.preferences
+import com.google.gson.Gson
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -33,6 +36,7 @@ import retrofit2.Response
 class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     private lateinit var binding: ActivityPlayBinding
+
     private val KEYBOARD = HashMap<Int, Char>()
     private val KEYBOARDCTO = HashMap<Char, Int>()
     private val LOG_TAG = this.javaClass.simpleName
@@ -44,21 +48,29 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
     private var lives:Int = 6
     private var listButtons: ArrayList<ButtonActivate> = ArrayList()
 
+    private var STATEGAME:Int = Constants.PLAY
 
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPlayBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
         dictionary()
 
-        callLetter()
+
+        val bundle = intent.extras
+        val isNewGame = bundle?.getBoolean("isNewGame")
+
+        isNewGame.let {
+            if(it == Constants.NEWGAME) newGame()
+            else recoveryGame()
+        }
 
         //Setting up the keyboard
         for (id in KEYBOARD.keys) {
             val button = findViewById(id) as Button
             button.isEnabled = true
-            button.isSoundEffectsEnabled = false
             button.setText(
                 KEYBOARD.get(id)
                     .toString()
@@ -67,11 +79,67 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
             button.setOnClickListener(this)
         }
 
+    }
+
+    private fun recoveryGame(){
+        try {
+            var gameS = preferences.game
+            val gson = Gson()
+            val game:Game = gson.fromJson(gameS,Game::class.java)
+
+            this.info = game.info!!
+            this.lives = game.lives!!
+            this.mArrayLetters = game.listLettersCheck!!
+            this.listButtons = game.listButtonActivate!!
+
+            activateButtons()
+
+            customView()
+
+        }catch (e:java.lang.Exception){
+            e.printStackTrace()
+        }
+    }
+
+    fun customView(){
+        binding.rvLetters.layoutManager = LinearLayoutManager(this@PlayActivity,LinearLayoutManager.HORIZONTAL ,false)
+        binding.rvLetters.adapter = AdapterLetter(this@PlayActivity, mArrayLetters)
+        info.category.let {itC ->
+            binding.tvCategory.text = getString(R.string.category, itC)
+        }
+        if(lives == 1)
+            binding.tvLives.text = getString(R.string.lives1)
+        else
+            binding.tvLives.text = getString(R.string.lives, lives)
+
+        updateImage()
+        binding.pbConexion.visibility = View.GONE
+    }
+
+    fun showDialogNoConection(serviceFailure: Boolean){
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_conection_network)
+        dialog.setCancelable(false)
+        val textDialog = dialog.findViewById<TextView>(R.id.text_description_dialog)
+        val buttonExit = dialog.findViewById<Button>(R.id.btExit)
+        if(serviceFailure) textDialog.text = getString(R.string.no_conection_service)
+        else textDialog.text = getString(R.string.no_conection_network)
+        buttonExit.setOnClickListener {
+            dialog.dismiss()
+            finish()
+        }
+
+        dialog.show()
 
     }
 
-
     fun callLetter(){
+        if(!isNetworkAvailable()){
+            binding.pbConexion.visibility = View.GONE
+            showDialogNoConection(false)
+            return
+        }
+
         val call = Constants.getRetrofit().create(API::class.java).getLetterService()
 
         CoroutineScope(Dispatchers.IO).launch {
@@ -83,30 +151,28 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
                 ) {
 
                     response.body()?.let { it ->
-                        binding.pbConexion.visibility = View.GONE
                         lives = 6
-                        binding.tvLives.text = getString(R.string.lives, lives)
                         info = it
-                        info.category.let {itC -> binding.tvCategory.text = getString(R.string.category, itC)}
-                        info.word?.let { itW ->
-                            Log.d(Constants.LOGTAG, "Respuesta del servidor: ${itW}")
+                        mArrayLetters.clear()
+                        listLettersCheck.clear()
 
+                        info.word?.let { itW ->
                             chars =  itW.toCharArray()
                             updateImage()
-
-                            mArrayLetters.clear()
-                            listLettersCheck.clear()
 
                             for(item in chars){
                                 mArrayLetters.add(LettersCheck(item))
                             }
-                            binding.rvLetters.layoutManager = LinearLayoutManager(this@PlayActivity,LinearLayoutManager.HORIZONTAL ,false)
-                            binding.rvLetters.adapter = AdapterLetter(this@PlayActivity, mArrayLetters)
+
+                            customView()
+
                         }
 
-                    }?:run{
-                        binding.pbConexion.visibility = View.GONE
 
+
+                    }?:run{
+                        showDialogNoConection(true)
+                        binding.pbConexion.visibility = View.GONE
                     }
 
                 }
@@ -115,7 +181,8 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
                     call: Call<ResponserServiceLetter>,
                     t: Throwable
                 ) {
-                    TODO("Not yet implemented")
+                    binding.pbConexion.visibility = View.GONE
+                    showDialogNoConection(true)
                 }
 
             })
@@ -125,7 +192,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     @SuppressLint("NotifyDataSetChanged")
     fun updateGame(guessedLetter: Char) {
-        val default:Char = '0'
+        val default = '0' //is Char
         if(guessedLetter == default){
             //no existe
         }else{
@@ -143,10 +210,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
             if(!correct){
                 lives -= 1
                 updateImage()
-
             }
-
-
             verifyVictoryOrLose()
         }
 
@@ -161,9 +225,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
             binding.tvLives.text = getString(R.string.lives, lives)
 
         if(lives == 0){
-            //Perdiste
-            Toast.makeText(this@PlayActivity, "Perdite", Toast.LENGTH_LONG)
-            println("Perdiste")
+            //your lose
             openDialogWL(false,false)
         }else{
             var allLettersCheck:Boolean = true
@@ -173,12 +235,9 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
                     break
                 }
             }
-
             if(allLettersCheck){
                 //your Win
                 openDialogWL(true,false)
-
-                Toast.makeText(this@PlayActivity, "Ganaste", Toast.LENGTH_LONG)
             }
         }
 
@@ -190,6 +249,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         dialog.setContentView(R.layout.dialog_finish_game)
         dialog.setCancelable(false)
         val text = dialog.findViewById<TextView>(R.id.text_description_dialog)
+        val textAnswer = dialog.findViewById<TextView>(R.id.tvAnswer)
         val buttonPlay = dialog.findViewById<Button>(R.id.btPlay)
         val buttonExit = dialog.findViewById<Button>(R.id.btExit)
         val buttonSave = dialog.findViewById<Button>(R.id.btSave)
@@ -207,12 +267,17 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
             }else{
                 text.text = getString(R.string.lose)
                 cBg.setBackgroundResource(R.drawable.image_avada_kadabra)
+                textAnswer.visibility = View.VISIBLE
+                textAnswer.text = getString(R.string.answer, info.word)
+
             }
         }
 
 
         buttonExit.setOnClickListener {
             dialog.dismiss()
+            STATEGAME = Constants.TERMINATE
+            preferences.game = null
             finish()
         }
 
@@ -232,7 +297,18 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
-    fun newGame(){
+    private fun newGame(){
+        //Activando todos los botones
+        listButtons.add(ButtonActivate('a' ,true));listButtons.add(ButtonActivate('b' ,true));listButtons.add(ButtonActivate('c' ,true))
+        listButtons.add(ButtonActivate('d',true));listButtons.add(ButtonActivate('e',true));listButtons.add(ButtonActivate('f',true))
+        listButtons.add(ButtonActivate('g',true));listButtons.add(ButtonActivate('h',true));listButtons.add(ButtonActivate('i',true))
+        listButtons.add(ButtonActivate('j',true));listButtons.add(ButtonActivate('k',true));listButtons.add(ButtonActivate('l',true))
+        listButtons.add(ButtonActivate('m',true));listButtons.add(ButtonActivate('n',true));listButtons.add(ButtonActivate('o',true))
+        listButtons.add(ButtonActivate('p',true));listButtons.add(ButtonActivate('q',true));listButtons.add(ButtonActivate('r',true))
+        listButtons.add(ButtonActivate('s',true));listButtons.add(ButtonActivate('t',true));listButtons.add(ButtonActivate('u',true))
+        listButtons.add(ButtonActivate('v',true));listButtons.add(ButtonActivate('w',true));listButtons.add(ButtonActivate('x',true))
+        listButtons.add(ButtonActivate('y',true));listButtons.add(ButtonActivate('z',true))
+
         binding.pbConexion.visibility = View.VISIBLE
         activateButtons()
         callLetter()
@@ -241,21 +317,13 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     fun updateImage(){
         when(lives){
-            0 ->
-                binding.ivState.setImageResource(R.drawable.ah_1)
-            1 ->
-                binding.ivState.setImageResource(R.drawable.ah_2)
-            2 ->
-                binding.ivState.setImageResource(R.drawable.ah_3)
-            3 ->
-                binding.ivState.setImageResource(R.drawable.ah_4)
-            4 ->
-                binding.ivState.setImageResource(R.drawable.ah_5)
-            5 ->
-                binding.ivState.setImageResource(R.drawable.ah_6)
-            6 ->
-                binding.ivState.setImageResource(R.drawable.ah_7)
-
+            0 -> binding.ivState.setImageResource(R.drawable.ah_1)
+            1 -> binding.ivState.setImageResource(R.drawable.ah_2)
+            2 -> binding.ivState.setImageResource(R.drawable.ah_3)
+            3 -> binding.ivState.setImageResource(R.drawable.ah_4)
+            4 -> binding.ivState.setImageResource(R.drawable.ah_5)
+            5 -> binding.ivState.setImageResource(R.drawable.ah_6)
+            6 -> binding.ivState.setImageResource(R.drawable.ah_7)
         }
     }
 
@@ -263,15 +331,11 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         val id = view.id
         if (KEYBOARD.keys.contains(id)) {
             fresh(true)
+
             val timer = object: CountDownTimer(1000, 100) {
                 override fun onTick(millisUntilFinished: Long) {}
-
-                override fun onFinish() {
-                    fresh(false)
-                }
-            }
-            timer.start()
-
+                override fun onFinish() { fresh(false) }
+            }; timer.start()
 
             val button = findViewById(id) as Button
             button.text = ""
@@ -293,16 +357,6 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     fun activateButtons(){
-        listButtons.add(ButtonActivate('a' ,true));listButtons.add(ButtonActivate('b' ,true));listButtons.add(ButtonActivate('c' ,true))
-        listButtons.add(ButtonActivate('d',true));listButtons.add(ButtonActivate('e',true));listButtons.add(ButtonActivate('f',true))
-        listButtons.add(ButtonActivate('g',true));listButtons.add(ButtonActivate('h',true));listButtons.add(ButtonActivate('i',true))
-        listButtons.add(ButtonActivate('j',true));listButtons.add(ButtonActivate('k',true));listButtons.add(ButtonActivate('l',true))
-        listButtons.add(ButtonActivate('m',true));listButtons.add(ButtonActivate('n',true));listButtons.add(ButtonActivate('o',true))
-        listButtons.add(ButtonActivate('p',true));listButtons.add(ButtonActivate('q',true));listButtons.add(ButtonActivate('r',true))
-        listButtons.add(ButtonActivate('s',true));listButtons.add(ButtonActivate('t',true));listButtons.add(ButtonActivate('u',true))
-        listButtons.add(ButtonActivate('v',true));listButtons.add(ButtonActivate('w',true));listButtons.add(ButtonActivate('x',true))
-        listButtons.add(ButtonActivate('y',true));listButtons.add(ButtonActivate('z',true))
-
         for (item in listButtons ){
             if(KEYBOARDCTO.keys.contains(item.idButton )){
                 val idB: Int? = KEYBOARDCTO.get(key = item.idButton)
@@ -314,13 +368,18 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
+
+//CICLO DE VIDA DE LA ACTIVIDAD:
     override fun onResume() {
         super.onResume()
     }
 
     override fun onPause() {
+        when(STATEGAME){
+            Constants.PLAY -> saveGame()
+            Constants.TERMINATE ->{/*Don't save game*/}
+        }
         super.onPause()
-
     }
 
     override fun onBackPressed() {
@@ -328,7 +387,26 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         Animatoo.animateSwipeLeft(this@PlayActivity)
     }
 
+    fun saveGame(){
+        val gson = Gson()
+        val game = Game(info= this.info, lives= this.lives, listLettersCheck= this.mArrayLetters, listButtonActivate= this.listButtons)
+        val jsonGame = gson.toJson(game)
+        preferences.game = jsonGame
+    }
 
+
+    /**Diccionarios
+     * En este método se inicializan dos diccionarios
+     * KEYBOARD: Guardara como clave el id del boton del sistema y
+     * como contenido tendra la letra a la que hace referencia en el teclado
+     * Función: Servira para detectar cuando el usuario de clic e inhabilitarlo
+     *
+     * KEYBOARDCTO: Guardará como clave la letra a la que hace referencia y
+     * como contenido el id del boton del sistema
+     * Función: Es facilitar la habilitación de los botones para una nueva partida en esta actividad
+     * o cuando el usuario haya guardado una partida y se requiera poner el teclado en el estado
+     * en que fue guardado.
+     * */
     private fun dictionary(){
         KEYBOARD.put(R.id.button1, 'a');KEYBOARD.put(R.id.button2, 'b');KEYBOARD.put(R.id.button3, 'c');KEYBOARD.put(R.id.button4, 'd')
         KEYBOARD.put(R.id.button5, 'e');KEYBOARD.put(R.id.button6, 'f');KEYBOARD.put(R.id.button7, 'g');KEYBOARD.put(R.id.button8, 'h')
@@ -346,6 +424,12 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         KEYBOARDCTO.put('u',R.id.button21);KEYBOARDCTO.put('v',R.id.button22);KEYBOARDCTO.put('w',R.id.button23);KEYBOARDCTO.put('x',R.id.button24)
         KEYBOARDCTO.put('y',R.id.button25);KEYBOARDCTO.put('z',R.id.button26)
 
+    }
+
+    fun isNetworkAvailable(): Boolean {
+        val cm = this.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = cm.activeNetworkInfo
+        return activeNetwork != null && activeNetwork.isConnectedOrConnecting
     }
 
 
