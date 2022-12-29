@@ -9,6 +9,7 @@ import com.blogspot.atifsoftwares.animatoolib.Animatoo
 import com.example.ahorcadogame.databinding.ActivityMainBinding
 import com.example.ahorcadogame.util.Constants
 import com.example.ahorcadogame.util.preferences
+import com.realpacific.clickshrinkeffect.applyClickShrink
 
 class MainActivity : AppCompatActivity() {
 
@@ -30,6 +31,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun listeners(){
+        binding.tvPlay.applyClickShrink()
+        binding.goOut.applyClickShrink()
+
         binding.tvPlay.setOnClickListener {
             if(preferences.game.isNullOrEmpty())
                 startGame(Constants.NEWGAME)

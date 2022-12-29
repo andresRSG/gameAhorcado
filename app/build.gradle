@@ -61,5 +61,9 @@ dependencies {
     //ANIMATION
     implementation 'com.github.AtifSayings:Animatoo:1.0.1'
 
+    //click
+    implementation 'com.github.realpacific:click-shrink-effect:2.0'
+
+
 
 }
