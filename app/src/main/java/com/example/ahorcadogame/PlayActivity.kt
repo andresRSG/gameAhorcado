@@ -2,10 +2,9 @@ package com.example.ahorcadogame
 
 import android.annotation.SuppressLint
 import android.app.Dialog
+import android.content.Context
 import android.net.ConnectivityManager
-import android.os.Build
-import android.os.Bundle
-import android.os.CountDownTimer
+import android.os.*
 import android.view.View
 import android.view.WindowManager
 import android.widget.Button
@@ -16,10 +15,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.blogspot.atifsoftwares.animatoolib.Animatoo
 import com.example.ahorcadogame.databinding.ActivityPlayBinding
-import com.example.ahorcadogame.models.ButtonActivate
-import com.example.ahorcadogame.models.Game
-import com.example.ahorcadogame.models.LettersCheck
-import com.example.ahorcadogame.models.ResponserServiceLetter
+import com.example.ahorcadogame.models.*
 import com.example.ahorcadogame.service.API
 import com.example.ahorcadogame.util.Constants
 import com.example.ahorcadogame.util.preferences
@@ -49,14 +45,24 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     private var STATEGAME:Int = Constants.PLAY
 
+    private  var sound:Boolean = Constants.ACTIVATE
+    private  var vibrate:Boolean = Constants.ACTIVATE
+
     @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPlayBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        dictionary()
+        val userS = preferences.user
+        val gson = Gson()
+        val userApp: UserApp = gson.fromJson(userS, UserApp::class.java)
 
+        sound = userApp.sound!!
+        vibrate = userApp.vibrate!!
+
+
+        dictionary()
 
         val bundle = intent.extras
         val isNewGame = bundle?.getBoolean(Constants.IDNEWGAME)
@@ -207,6 +213,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
             binding.rvLetters.adapter?.notifyDataSetChanged()
 
             if(!correct){
+                if(vibrate) vibratePhone()
                 lives -= 1
                 updateImage()
             }
@@ -215,7 +222,15 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
+    fun vibratePhone() {
+        val vibratorService = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
 
+        if (Build.VERSION.SDK_INT >= 26) {
+            vibratorService.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            vibratorService.vibrate(200)
+        }
+    }
 
     fun verifyVictoryOrLose(){
         if(lives == 1)
@@ -430,6 +445,27 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         val activeNetwork = cm.activeNetworkInfo
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting
     }
+
+//    fun confettiStart() {
+//        konfettiView.build()
+//            .addColors(
+//                resources.getColor(R.color.yellow_c),
+//                resources.getColor(R.color.green_c),
+//                resources.getColor(R.color.blue_c),
+//                resources.getColor(R.color.grey_c),
+//                resources.getColor(R.color.orange_c),
+//                resources.getColor(R.color.purple_c)
+//            )
+//            .setDirection(0.0, 359.0)
+//            .setSpeed(1f, 12f)
+//            .setFadeOutEnabled(true)
+//            .setTimeToLive(2000L)
+//            .addShapes(Shape.Square.INSTANCE)
+//            .setPosition(-50f, konfettiView.getWidth() + 50f, -50f, -50f)
+//            .streamFor(500, 1000L)
+//    }
+
+
 
 
 }

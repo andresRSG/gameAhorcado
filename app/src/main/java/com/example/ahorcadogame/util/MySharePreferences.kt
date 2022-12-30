@@ -17,4 +17,5 @@ class MySharePreferences (context: Context) {
         get() = prefs.getString("user", "")
         set(value) = prefs.edit().putString("user", value).apply()
 
+
 }

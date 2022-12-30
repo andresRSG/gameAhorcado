@@ -64,6 +64,8 @@ dependencies {
     //click
     implementation 'com.github.realpacific:click-shrink-effect:2.0'
 
+    //check box
+    implementation 'com.github.zcweng:switch-button:0.0.3@aar'
 
 
 }

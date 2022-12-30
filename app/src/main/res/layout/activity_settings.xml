@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".SettingsActivity"
+    android:background="@drawable/bd_settings"
+    >
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/black"
+        android:alpha="0.5"
+        />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_margin="20dp"
+        >
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/settings"
+            android:padding="20dp"
+            android:textSize="35dp"
+            android:textColor="@color/ah_yellowL"
+            android:fontFamily="@font/harry_potter_uno"
+            android:shadowColor="@color/ah_redL"
+            android:shadowRadius="50"
+            />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="1"
+            android:layout_marginTop="10dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.8"
+                android:textSize="25sp"
+                android:fontFamily="@font/harry_potter_dos"
+                android:textColor="@color/white"
+                android:gravity="center_vertical"
+                android:text="@string/sound"
+                />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.2"
+                android:orientation="vertical"
+                >
+                <com.suke.widget.SwitchButton
+                    android:id="@+id/switch_buttonSound"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:orientation="horizontal"
+            android:weightSum="1"
+            android:layout_marginTop="10dp"
+            >
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.8"
+                android:textSize="25sp"
+                android:fontFamily="@font/harry_potter_dos"
+                android:textColor="@color/white"
+                android:gravity="center_vertical"
+                android:text="@string/vibrate"
+                />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="0.2"
+                android:orientation="vertical"
+                >
+                <com.suke.widget.SwitchButton
+                    android:id="@+id/switch_buttonVibrate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    />
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btSave"
+            android:layout_width="match_parent"
+            android:layout_height="45dp"
+            android:layout_margin="20dp"
+            android:text="@string/save"
+            />
+
+
+
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

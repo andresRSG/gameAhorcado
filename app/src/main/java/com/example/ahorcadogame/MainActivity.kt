@@ -7,8 +7,10 @@ import android.os.Bundle
 import android.widget.Button
 import com.blogspot.atifsoftwares.animatoolib.Animatoo
 import com.example.ahorcadogame.databinding.ActivityMainBinding
+import com.example.ahorcadogame.models.UserApp
 import com.example.ahorcadogame.util.Constants
 import com.example.ahorcadogame.util.preferences
+import com.google.gson.Gson
 import com.realpacific.clickshrinkeffect.applyClickShrink
 
 class MainActivity : AppCompatActivity() {
@@ -19,6 +21,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        //Settings
+        if(preferences.user.isNullOrEmpty()){
+            val userApp = UserApp(Constants.ACTIVATE,Constants.ACTIVATE)
+            val gson = Gson()
+            val jsonGame = gson.toJson(userApp)
+            preferences.user = jsonGame
+        }
+
 
         listeners()
     }
@@ -33,11 +44,18 @@ class MainActivity : AppCompatActivity() {
     private fun listeners(){
         binding.tvPlay.applyClickShrink()
         binding.goOut.applyClickShrink()
+        binding.tvSettings.applyClickShrink()
 
         binding.tvPlay.setOnClickListener {
             if(preferences.game.isNullOrEmpty())
                 startGame(Constants.NEWGAME)
             else showDialogSaveGame()
+        }
+
+        binding.tvSettings.setOnClickListener {
+            val intent = Intent(this@MainActivity, SettingsActivity::class.java)
+            startActivity(intent)
+            Animatoo.animateSpin(this@MainActivity)
         }
 
         binding.goOut.setOnClickListener { finish() }
