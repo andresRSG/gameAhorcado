@@ -39,14 +39,12 @@ object Constants {
     }
 
     fun playSoundCheck(context: Context?, sound: Int) {
-//        stopSoundIfExist()
         mediaPlayer = MediaPlayer.create(context, sound)
         mediaPlayer!!.isLooping = false
         this.mediaPlayer!!.start()
     }
 
     fun playSoundWL(context: Context?, win:Boolean) {
-//        stopSoundIfExist()
         var sound:Int? = null
 
         if(win){
