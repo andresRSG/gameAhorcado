@@ -22,23 +22,39 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        //Settings
-        if(preferences.user.isNullOrEmpty()){
-            val userApp = UserApp(Constants.ACTIVATE,Constants.ACTIVATE)
-            val gson = Gson()
-            val jsonGame = gson.toJson(userApp)
-            preferences.user = jsonGame
-        }
-
-
         listeners()
     }
 
-
     override fun onResume() {
+        Constants.stopSoundIfExist()
+        //Settings
+        val userApp = settings()
+
+        if(userApp.sound == true){
+            Constants.playSoundIntro(this@MainActivity, R.raw.intro_hp)
+        }
+
         super.onResume()
+
         Animatoo.animateSlideRight(this@MainActivity)
 
+
+    }
+
+//Settings
+ private fun settings():UserApp{
+        if(preferences.user.isNullOrEmpty()){
+            val userApp = UserApp(Constants.ACTIVATE,Constants.ACTIVATE)
+            val gson = Gson()
+            val jsonUser = gson.toJson(userApp)
+            preferences.user = jsonUser
+            return userApp
+        }else{
+            val sUserApp = preferences.user
+            val gson = Gson()
+            val userApp = gson.fromJson(sUserApp,UserApp::class.java)
+            return userApp
+        }
     }
 
     private fun listeners(){

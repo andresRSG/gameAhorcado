@@ -6,7 +6,8 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity"
     android:background="@drawable/banner_map"
-    >
+    tools:ignore="UnusedAttribute"
+    tools:targetApi="q">
 
     <View
         android:layout_width="0dp"

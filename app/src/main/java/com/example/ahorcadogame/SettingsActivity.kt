@@ -30,9 +30,11 @@ class SettingsActivity : AppCompatActivity() {
         binding.switchButtonSound.setChecked(sound)
         binding.switchButtonVibrate.setChecked(vibrate)
 
+        playSound(sound)
 
         binding.switchButtonSound.setOnCheckedChangeListener(SwitchButton.OnCheckedChangeListener { view, isChecked ->
             sound = isChecked
+            playSound(isChecked)
         })
 
         binding.switchButtonVibrate.setOnCheckedChangeListener(SwitchButton.OnCheckedChangeListener { view, isChecked ->
@@ -44,10 +46,30 @@ class SettingsActivity : AppCompatActivity() {
             val gson = Gson()
             val jsonGame = gson.toJson(userApp)
             preferences.user = jsonGame
-
             finish()
         }
 
+    }
 
+    fun playSound(isChecked:Boolean){
+        if(isChecked){
+            Constants.playSoundIntro(this@SettingsActivity, R.raw.intro2_hp)
+        }else{
+            Constants.stopSoundIfExist()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        playSound(sound)
+    }
+
+    override fun onBackPressed() {
+        playSound(sound)
+        super.onBackPressed()
     }
 }

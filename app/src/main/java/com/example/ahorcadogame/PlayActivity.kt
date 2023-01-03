@@ -43,7 +43,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
     private var lives:Int = 6
     private var listButtons: ArrayList<ButtonActivate> = ArrayList()
 
-    private var STATEGAME:Int = Constants.PLAY
+    private var STATEGAME:Int = Constants.PAUSE
 
     private  var sound:Boolean = Constants.ACTIVATE
     private  var vibrate:Boolean = Constants.ACTIVATE
@@ -100,42 +100,10 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
             activateButtons()
 
             customView()
-
+            startGame()
         }catch (e:java.lang.Exception){
             e.printStackTrace()
         }
-    }
-
-    fun customView(){
-        binding.rvLetters.layoutManager = LinearLayoutManager(this@PlayActivity,LinearLayoutManager.HORIZONTAL ,false)
-        binding.rvLetters.adapter = AdapterLetter(this@PlayActivity, mArrayLetters)
-        info.category.let {itC ->
-            binding.tvCategory.text = getString(R.string.category, itC)
-        }
-        if(lives == 1)
-            binding.tvLives.text = getString(R.string.lives1)
-        else
-            binding.tvLives.text = getString(R.string.lives, lives)
-
-        updateImage()
-        binding.pbConexion.visibility = View.GONE
-    }
-
-    fun showDialogNoConection(serviceFailure: Boolean){
-        val dialog = Dialog(this)
-        dialog.setContentView(R.layout.dialog_conection_network)
-        dialog.setCancelable(false)
-        val textDialog = dialog.findViewById<TextView>(R.id.text_description_dialog)
-        val buttonExit = dialog.findViewById<Button>(R.id.btExit)
-        if(serviceFailure) textDialog.text = getString(R.string.no_conection_service)
-        else textDialog.text = getString(R.string.no_conection_network)
-        buttonExit.setOnClickListener {
-            dialog.dismiss()
-            finish()
-        }
-
-        dialog.show()
-
     }
 
     fun callLetter(){
@@ -170,7 +138,7 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
                             }
 
                             customView()
-
+                            startGame()
                         }
 
 
@@ -195,65 +163,40 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun updateGame(guessedLetter: Char) {
-        val default = '0' //is Char
-        if(guessedLetter == default){
-            //no existe: la ñ, por ejemplo
-        }else{
-            listLettersCheck.add(guessedLetter)
-            var correct = false
-            for(item in mArrayLetters){
-                if(item.letter == guessedLetter){
-                    item.isCheck = true
-                    correct = true
-                }
-            }
-            binding.rvLetters.adapter = AdapterLetter(this@PlayActivity, mArrayLetters)
-            binding.rvLetters.adapter?.notifyDataSetChanged()
-
-            if(!correct){
-                if(vibrate) vibratePhone()
-                lives -= 1
-                updateImage()
-            }
-            verifyVictoryOrLose()
+    fun customView(){
+        binding.rvLetters.layoutManager = LinearLayoutManager(this@PlayActivity,LinearLayoutManager.HORIZONTAL ,false)
+        binding.rvLetters.adapter = AdapterLetter(this@PlayActivity, mArrayLetters)
+        info.category.let {itC ->
+            binding.tvCategory.text = getString(R.string.category, itC)
         }
 
-    }
-
-    fun vibratePhone() {
-        val vibratorService = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-
-        if (Build.VERSION.SDK_INT >= 26) {
-            vibratorService.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
-        } else {
-            vibratorService.vibrate(200)
-        }
-    }
-
-    fun verifyVictoryOrLose(){
         if(lives == 1)
             binding.tvLives.text = getString(R.string.lives1)
         else
             binding.tvLives.text = getString(R.string.lives, lives)
 
-        if(lives == 0){
-            //your lose
-            openDialogWL(false,false)
-        }else{
-            var allLettersCheck:Boolean = true
-            for(item in mArrayLetters){
-                if(!item.isCheck){
-                    allLettersCheck = false
-                    break
-                }
-            }
-            if(allLettersCheck){
-                //your Win
-                openDialogWL(true,false)
-            }
+        updateImage()
+        binding.pbConexion.visibility = View.GONE
+    }
+
+    fun startGame(){
+        STATEGAME = Constants.PLAY
+    }
+
+    fun showDialogNoConection(serviceFailure: Boolean){
+        val dialog = Dialog(this)
+        dialog.setContentView(R.layout.dialog_conection_network)
+        dialog.setCancelable(false)
+        val textDialog = dialog.findViewById<TextView>(R.id.text_description_dialog)
+        val buttonExit = dialog.findViewById<Button>(R.id.btExit)
+        if(serviceFailure) textDialog.text = getString(R.string.no_conection_service)
+        else textDialog.text = getString(R.string.no_conection_network)
+        buttonExit.setOnClickListener {
+            dialog.dismiss()
+            finish()
         }
+
+        dialog.show()
 
     }
 
@@ -272,9 +215,11 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
         if(leave){
             text.text = getString(R.string.leave)
-            buttonSave.visibility = View.VISIBLE
             vBg.visibility = View.GONE
+            if(STATEGAME == Constants.PLAY) buttonSave.visibility = View.VISIBLE
         }else{
+//            Constants.playSoundWL(this@PlayActivity, win)
+
             if(win){
                 text.text = getString(R.string.win)
                 cBg.setBackgroundResource(R.drawable.image_avada_kadabra)
@@ -283,7 +228,6 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
                 cBg.setBackgroundResource(R.drawable.image_avada_kadabra)
                 textAnswer.visibility = View.VISIBLE
                 textAnswer.text = getString(R.string.answer, info.word)
-
             }
         }
 
@@ -311,6 +255,88 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
+    @SuppressLint("NotifyDataSetChanged")
+    fun updateGame(guessedLetter: Char) {
+        val default = '0' //is Char
+        if(guessedLetter == default){
+            //no existe: la ñ, por ejemplo
+        }else{
+            listLettersCheck.add(guessedLetter)
+            var correct = false
+            for(item in mArrayLetters){
+                if(item.letter == guessedLetter){
+                    item.isCheck = true
+                    correct = true
+                }
+            }
+            binding.rvLetters.adapter = AdapterLetter(this@PlayActivity, mArrayLetters)
+            binding.rvLetters.adapter?.notifyDataSetChanged()
+
+            if(!correct){
+                if(vibrate) vibratePhone()
+                lives -= 1
+                updateImage()
+            }
+
+            if(sound) Constants.playSoundWL(this@PlayActivity, correct)
+
+            verifyVictoryOrLose()
+        }
+
+    }
+
+    fun updateImage(){
+        when(lives){
+            0 -> binding.ivState.setImageResource(R.drawable.ah_1)
+            1 -> binding.ivState.setImageResource(R.drawable.ah_2)
+            2 -> binding.ivState.setImageResource(R.drawable.ah_3)
+            3 -> binding.ivState.setImageResource(R.drawable.ah_4)
+            4 -> binding.ivState.setImageResource(R.drawable.ah_5)
+            5 -> binding.ivState.setImageResource(R.drawable.ah_6)
+            6 -> binding.ivState.setImageResource(R.drawable.ah_7)
+        }
+    }
+
+    fun verifyVictoryOrLose(){
+
+        if(lives == 0){
+            //your lose
+            openDialogWL(false,false)
+        }else{
+            var allLettersCheck:Boolean = true
+            for(item in mArrayLetters){
+                if(!item.isCheck){
+                    allLettersCheck = false
+                    break
+                }
+            }
+            if(allLettersCheck){
+                //your Win
+                openDialogWL(true,false)
+            }
+        }
+
+    }
+
+    private fun fresh(f:Boolean){
+        if(f){
+            window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
+        }else{
+            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
+        }
+    }
+
+    fun vibratePhone() {
+        val vibratorService = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+
+        if (Build.VERSION.SDK_INT >= 26) {
+            vibratorService.vibrate(VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE))
+        } else {
+            vibratorService.vibrate(200)
+        }
+    }
+
     private fun newGame(){
         //Activando todos los botones
         listButtons.add(ButtonActivate('a' ,true));listButtons.add(ButtonActivate('b' ,true));listButtons.add(ButtonActivate('c' ,true))
@@ -326,19 +352,6 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
         binding.pbConexion.visibility = View.VISIBLE
         activateButtons()
         callLetter()
-    }
-
-
-    fun updateImage(){
-        when(lives){
-            0 -> binding.ivState.setImageResource(R.drawable.ah_1)
-            1 -> binding.ivState.setImageResource(R.drawable.ah_2)
-            2 -> binding.ivState.setImageResource(R.drawable.ah_3)
-            3 -> binding.ivState.setImageResource(R.drawable.ah_4)
-            4 -> binding.ivState.setImageResource(R.drawable.ah_5)
-            5 -> binding.ivState.setImageResource(R.drawable.ah_6)
-            6 -> binding.ivState.setImageResource(R.drawable.ah_7)
-        }
     }
 
     override fun onClick(view: View) {
@@ -360,16 +373,6 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
-
-    private fun fresh(f:Boolean){
-        if(f){
-            window.setFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-                WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE)
-        }else{
-            window.clearFlags(WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE);
-        }
-    }
-
     fun activateButtons(){
         for (item in listButtons ){
             if(KEYBOARDCTO.keys.contains(item.idButton )){
@@ -382,8 +385,14 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
 
     }
 
+    fun saveGame(){
+        val gson = Gson()
+        val game = Game(info= this.info, lives= this.lives, listLettersCheck= this.mArrayLetters, listButtonActivate= this.listButtons)
+        val jsonGame = gson.toJson(game)
+        preferences.game = jsonGame
+    }
 
-//CICLO DE VIDA DE LA ACTIVIDAD:
+    //CICLO DE VIDA DE LA ACTIVIDAD:
     override fun onResume() {
         super.onResume()
     }
@@ -399,13 +408,6 @@ class PlayActivity : AppCompatActivity(), View.OnClickListener {
     override fun onBackPressed() {
         openDialogWL(false,true)
         Animatoo.animateSwipeLeft(this@PlayActivity)
-    }
-
-    fun saveGame(){
-        val gson = Gson()
-        val game = Game(info= this.info, lives= this.lives, listLettersCheck= this.mArrayLetters, listButtonActivate= this.listButtons)
-        val jsonGame = gson.toJson(game)
-        preferences.game = jsonGame
     }
 
 
